@@ -1,0 +1,13 @@
+name: iPxBuffs
+version: '1.0'
+main: de.iplexy.iPxBuffs.IPxBuffs
+api-version: '1.21'
+prefix: iPxBuffs
+authors: [ iPlexy ]
+description: Buff-System
+website: https://iplexy.de
+dependencies:
+  server:
+    CoinsEngine:
+      load: BEFORE
+      required: true
