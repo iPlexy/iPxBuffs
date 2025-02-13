@@ -34,7 +34,7 @@ public class BuffGui {
 
         fillGui(gui);
 
-        gui.setItem(4,9,ItemBuilder.from(Material.REDSTONE_TORCH)
+        gui.setItem(4, 9, ItemBuilder.from(Material.REDSTONE_TORCH)
                 .name(Component.text("§7» §cInformationen"))
                 .lore(List.of(
                         Component.empty(),
@@ -44,7 +44,18 @@ public class BuffGui {
                 ))
                 .asGuiItem());
 
+        gui.setItem(4,1,ItemBuilder.from(Material.BARRIER)
+                .name(Component.text("§7» §cMenü schließen"))
+                .lore(List.of(
+                        Component.empty(),
+                        Component.text("§7Klicke hier, um das Menü zu schließen.")
+                ))
+                .asGuiItem(event -> gui.close(player)));
+
         buildBuffItems(player, gui, user);
+
+        gui.setOpenGuiAction(event ->
+                refreshGui(player, gui, user));
 
         gui.open(player);
     }
@@ -52,27 +63,44 @@ public class BuffGui {
     private static void buildBuffItems(Player player, Gui gui, BuffUser user) {
         Arrays.stream(BuffType.values()).forEach(buff -> {
             gui.setItem(buff.getRow(), buff.getColumn(), ItemBuilder.from(buff.getIcon())
-                    .name(Component.text("» ").decoration(TextDecoration.ITALIC,false).color(NamedTextColor.GRAY).append(buff.getName()).append(getActivityState(buff)))
+                    .name(Component.text("» ").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY).append(buff.getName()).append(getActivityState(buff)))
                     .lore(createLore(buff, user))
                     .asGuiItem(event -> {
-                        if(BuffManager.isBuffActive(buff)){
+                        if (BuffManager.isBuffActive(buff)) {
                             player.sendMessage(IPxBuffs.getPrefix().append(Component.text("§cEs ist bereits ein ").append(buff.getName()).append(Component.text("§c aktiv."))));
-                            player.playSound(player, Sound.BLOCK_REDSTONE_TORCH_BURNOUT,0.5F,2F);
+                            player.playSound(player, Sound.BLOCK_REDSTONE_TORCH_BURNOUT, 0.5F, 2F);
                             return;
                         }
-                        if(!user.hasAvailableBuff(buff)){
+                        if (!user.hasAvailableBuff(buff)) {
                             player.sendMessage(IPxBuffs.getPrefix().append(Component.text("§cDu hast keinen ").append(buff.getName()).append(Component.text("§c mehr."))));
-                            player.playSound(player, Sound.BLOCK_REDSTONE_TORCH_BURNOUT,0.5F,2F);
+                            player.playSound(player, Sound.BLOCK_REDSTONE_TORCH_BURNOUT, 0.5F, 2F);
+                            return;
+                        }
+                        if(BuffManager.getActiveBuffs().size() >= 3){
+                            player.sendMessage(IPxBuffs.getPrefix().append(Component.text("§cEs können nur maximal §e3 Buffs §caktiv sein.")));
+                            player.playSound(player, Sound.BLOCK_REDSTONE_TORCH_BURNOUT, 0.5F, 2F);
                             return;
                         }
                         BuffManager.activateBuff(buff, player);
-                        gui.close(player);
                     })
             );
         });
     }
 
-    private static List<Component> createLore(BuffType type, BuffUser user){
+    private static void refreshGui(Player player, Gui gui, BuffUser user) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                buildBuffItems(player, gui, user);
+                gui.update();
+                if (!player.getOpenInventory().getTopInventory().equals(gui.getInventory())) {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(IPxBuffs.getPlugin(), 0, 20);
+    }
+
+    private static List<Component> createLore(BuffType type, BuffUser user) {
         var lore = new ArrayList<Component>(type.getDescription());
         lore.add(Component.empty());
         lore.add(Component.text("§7In Besitz: §b%d Stück".formatted(user.getAvailableBuff(type))));
@@ -80,17 +108,16 @@ public class BuffGui {
         return lore;
     }
 
-    private static Component getActivityState(BuffType buff){
-        if(BuffManager.isBuffActive(buff)){
+    private static Component getActivityState(BuffType buff) {
+        if (BuffManager.isBuffActive(buff)) {
             return MiniMessage.miniMessage().deserialize("<gray> » <#40a832>ᴀᴋᴛɪᴠ </#40a832></gray>").append(getRemainingTime(buff));
         }
         return MiniMessage.miniMessage().deserialize("<gray> » <#c23030>ɪɴᴀᴋᴛɪᴠ</#c23030></gray>");
     }
 
-    private static Component getRemainingTime(BuffType buff){
+    private static Component getRemainingTime(BuffType buff) {
         return MiniMessage.miniMessage().deserialize("<dark_gray>(<yellow>%s</yellow> <gray>verbleibend</gray>)</dark_gray>".formatted(TimeUtils.getRemainingTimeFormatted(BuffManager.getRemainingTime(buff))));
     }
-
 
 
     private static void fillGui(Gui gui) {
@@ -104,13 +131,13 @@ public class BuffGui {
                 .flags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
                 .asGuiItem();
 
-        gui.getFiller().fillBetweenPoints(1,1,1,2,cornerFiller);
-        gui.getFiller().fillBetweenPoints(1,8,1,9,cornerFiller);
-        gui.getFiller().fillBetweenPoints(2,1,2,1,cornerFiller);
-        gui.getFiller().fillBetweenPoints(2,9,2,9,cornerFiller);
-        gui.getFiller().fillBetweenPoints(3,1,3,1,cornerFiller);
-        gui.getFiller().fillBetweenPoints(3,9,3,9,cornerFiller);
-        gui.getFiller().fillBetweenPoints(4,1,4,2,cornerFiller);
-        gui.getFiller().fillBetweenPoints(4,8,4,9,cornerFiller);
+        gui.getFiller().fillBetweenPoints(1, 1, 1, 2, cornerFiller);
+        gui.getFiller().fillBetweenPoints(1, 8, 1, 9, cornerFiller);
+        gui.getFiller().fillBetweenPoints(2, 1, 2, 1, cornerFiller);
+        gui.getFiller().fillBetweenPoints(2, 9, 2, 9, cornerFiller);
+        gui.getFiller().fillBetweenPoints(3, 1, 3, 1, cornerFiller);
+        gui.getFiller().fillBetweenPoints(3, 9, 3, 9, cornerFiller);
+        gui.getFiller().fillBetweenPoints(4, 1, 4, 2, cornerFiller);
+        gui.getFiller().fillBetweenPoints(4, 8, 4, 9, cornerFiller);
     }
 }

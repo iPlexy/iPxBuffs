@@ -19,10 +19,11 @@ public class BuffCommand extends BaseCommand {
         BuffGui.open(player);
     }
 
-    @Subcommand("listbuffs")
+    @Subcommand("listactive")
     public void onListBuffs(Player player) {
-        BuffManager.getActiveBuffs().forEach((buff, time) -> {
-            player.sendMessage(IPxBuffs.getPrefix().append(Component.text("§7Buff §9%s§7: §e%d§7 verbleibend".formatted(buff.name(), TimeUtils.getRemainingTime(time)))));
-        });
+        player.sendMessage(IPxBuffs.getPrefix().append(Component.text("§7Folgende Buffs sind aktuell aktiv:")));
+        BuffManager.getActiveBuffs().forEach((buff, time) ->
+                player.sendMessage(buff.getName().append(Component.text("§7 » ")).append(Component.text("§e%s".formatted(TimeUtils.getRemainingTimeFormatted(time)))))
+        );
     }
 }

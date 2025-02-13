@@ -11,3 +11,6 @@ dependencies:
     CoinsEngine:
       load: BEFORE
       required: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: true
