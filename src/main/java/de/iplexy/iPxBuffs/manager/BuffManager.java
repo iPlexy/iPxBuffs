@@ -273,5 +273,14 @@ public class BuffManager {
         }
     }
 
+    public static void startAutoSave(){
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                save();
+            }
+        }.runTaskTimer(IPxBuffs.getPlugin(), 20L, 20L*60*5);  //20 Ticks -> Sekunden -> Minuten
+    }
+
 
 }

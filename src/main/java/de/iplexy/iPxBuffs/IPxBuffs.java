@@ -41,6 +41,7 @@ public final class IPxBuffs extends JavaPlugin {
         registerPlaceholders();
         BuffManager.load();
         BuffManager.startBuffChecker();
+        BuffManager.startAutoSave();
     }
 
     @Override
